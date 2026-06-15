@@ -1,0 +1,54 @@
+{% macro render_field(field) %}
+    <div class="mb-3">
+        {{ field.label(class="form-label") }}
+        {% if field.type == "SelectMultipleField" %}
+            {{ field(class="form-select" + (" is-invalid" if field.errors else ""), **kwargs) }}
+        {% elif field.type in ("BooleanField",) %}
+            <div class="form-check">
+                {{ field(class="form-check-input" + (" is-invalid" if field.errors else "")) }}
+                {{ field.label(class="form-check-label") }}
+            </div>
+        {% elif field.type == "TextAreaField" %}
+            {{ field(class="form-control" + (" is-invalid" if field.errors else ""), **kwargs) }}
+        {% else %}
+            {{ field(class="form-control" + (" is-invalid" if field.errors else ""), **kwargs) }}
+        {% endif %}
+        {% for error in field.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+
+{% macro pagination(pager, endpoint) %}
+    {% if pager.pages > 1 %}
+    <nav aria-label="Постраничная навигация">
+        <ul class="pagination">
+            <li class="page-item {{ 'disabled' if not pager.has_prev }}">
+                <a class="page-link" href="{{ url_for(endpoint, page=pager.prev_num, **kwargs) if pager.has_prev else '#' }}">Назад</a>
+            </li>
+            {% for page_num in pager.iter_pages() %}
+                {% if page_num %}
+                    <li class="page-item {{ 'active' if page_num == pager.page }}">
+                        <a class="page-link" href="{{ url_for(endpoint, page=page_num, **kwargs) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+            {% endfor %}
+            <li class="page-item {{ 'disabled' if not pager.has_next }}">
+                <a class="page-link" href="{{ url_for(endpoint, page=pager.next_num, **kwargs) if pager.has_next else '#' }}">Вперёд</a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro star_rating(value) %}
+    {% if value is none %}
+        <span class="text-muted">нет оценок</span>
+    {% else %}
+        <span>{{ "%.1f"|format(value) }} / 5</span>
+    {% endif %}
+{% endmacro %}

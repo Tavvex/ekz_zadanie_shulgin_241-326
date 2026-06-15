@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "_macros.html" import render_field %}
+
+{% block title %}{{ "Редактирование книги" if is_edit else "Добавление книги" }} — Электронная библиотека{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">{{ "Редактирование книги" if is_edit else "Добавление книги" }}</h1>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+
+        {{ render_field(form.title) }}
+        {{ render_field(form.description, id="description") }}
+        {{ render_field(form.year) }}
+        {{ render_field(form.publisher) }}
+        {{ render_field(form.author) }}
+        {{ render_field(form.pages) }}
+        {{ render_field(form.genres) }}
+
+        {% if not is_edit %}
+            {{ render_field(form.cover) }}
+        {% endif %}
+
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script>
+        new EasyMDE({ element: document.getElementById("description") });
+    </script>
+{% endblock %}

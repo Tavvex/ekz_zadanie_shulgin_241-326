@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_macros.html" import star_rating %}
+
+{% block title %}{{ book.title }} — Электронная библиотека{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            {% if book.cover %}
+                <img src="{{ url_for('static', filename='uploads/covers/' + book.cover.filename) }}"
+                     class="img-fluid rounded shadow-sm" alt="Обложка книги «{{ book.title }}»">
+            {% else %}
+                <div class="book-cover book-cover-placeholder d-flex align-items-center justify-content-center text-muted rounded">
+                    нет обложки
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1>{{ book.title }}</h1>
+            <p><strong>Автор:</strong> {{ book.author }}</p>
+            <p><strong>Издательство:</strong> {{ book.publisher }}</p>
+            <p><strong>Год:</strong> {{ book.year }}</p>
+            <p><strong>Объём:</strong> {{ book.pages }} стр.</p>
+            <p><strong>Жанр:</strong>
+                {% if book.genres %}
+                    {{ book.genres | map(attribute='name') | join(', ') }}
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+            <p><strong>Средняя оценка:</strong> {{ star_rating(book.average_rating) }} ({{ reviews | length }} рец.)</p>
+
+            <hr>
+            <div class="book-description">
+                {{ book.description | markdown | safe }}
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <h2 class="mb-3">Рецензии</h2>
+
+    {% if not reviews %}
+        <p class="text-muted">Пока нет одобренных рецензий.</p>
+    {% endif %}
+
+    {% for review in reviews %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">
+                    {{ review.user.full_name }} — оценка {{ review.rating }}/5
+                    <span class="float-end">{{ review.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                </h6>
+                <div class="review-text">{{ review.text | markdown | safe }}</div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <hr>
+
+    {% if user_review %}
+        <h5>Ваша рецензия</h5>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">
+                    Оценка {{ user_review.rating }}/5 — статус: {{ user_review.status.name }}
+                </h6>
+                <div class="review-text">{{ user_review.text | markdown | safe }}</div>
+            </div>
+        </div>
+    {% elif can_review %}
+        <a href="{{ url_for('reviews.create', book_id=book.id) }}" class="btn btn-primary">Написать рецензию</a>
+    {% endif %}
+{% endblock %}
